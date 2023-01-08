@@ -61,7 +61,6 @@ def KVE(X,Y,kernel):
     assert X.ndim == Y.ndim == 2
     K_XX = kernel(X, X)
     K_XY = kernel(X, Y)
-    #K_YX = kernel(Y, X) # doesnt work why
     K_YY = kernel(Y, Y)
        
     n = len(X)
@@ -71,12 +70,6 @@ def KVE(X,Y,kernel):
     K_YY -= K_YY.sum(axis=1, keepdims=True) / m
     K_YXt  = K_XY - K_XY.sum(axis=0, keepdims=True) / n
     K_XY -= K_XY.sum(axis=1, keepdims=True) / m
-    #Hn = np.identity(n) - np.ones((n,n))/n
-    #Hm = np.identity(m) - np.ones((m,m))/m
-    #K_XX = np.matmul(K_XX, Hn)
-    #K_YY = np.matmul(K_YY, Hm)
-    #K_XY = np.matmul(K_XY, Hm)
-    #K_YX = np.matmul(K_YX, Hn)
     
     mmd = np.sum(K_XX * K_XX.transpose()) / (n*n) + np.sum(K_YY * K_YY.transpose()) / (m*m) - 2.0 * np.sum(K_XY * K_YXt) / (n*m)
     return mmd
@@ -110,25 +103,6 @@ def HSIC(X,Y,k,l):
     H = np.identity(n) - np.ones((n,n))/n
     return np.trace(np.matmul(np.matmul(K,H),np.matmul(L,H)))/(n*n)
 
-#def CSIC(X,Y,k,l):
-#    K = k(X,X)
-#    L = l(Y,Y)
-#    n = len(K)
-#    H = np.ones((n,n))/n
-    
-#    muk_r = np.matmul(K,H)
-#    mul_r = np.matmul(L,H)
-#    muk_l = np.matmul(H,K)
-#    mul_l = np.matmul(H,L)
-    
-#    KK = np.sum(K)/(n*n)
-#    LL = np.sum(L)/(n*n)
-    
-#    return np.sum( K*K*L -    4*K*muk_r*L -     2*K*K*mul_r +    4*muk_r*K*mul_r
-#               + 2*K*L*KK +   2*muk_r*muk_l*L + 4*K*muk_l*mul_r +  K*K*LL
-#               - 8*K*mul_r*KK - 4*K*muk_r*LL +    4*KK*KK*LL
-#                 )/(n*n)
-
 def CSIC(X,Y,k,l): 
     K = k(X,X)
     L = l(Y,Y)
@@ -138,12 +112,6 @@ def CSIC(X,Y,k,l):
     mul_r = L.sum(axis=1, keepdims=True) / n
     muk_l = K.sum(axis=0, keepdims=True) / n
     mul_l = L.sum(axis=0, keepdims=True) / n
-
-    #H = np.ones((n,n))/n
-    #muk_r = np.matmul(K,H)
-    #mul_r = np.matmul(L,H)
-    #muk_l = np.matmul(H,K)
-    #mul_l = np.matmul(H,L)
     
     KK = np.sum(K)/(n*n)
     LL = np.sum(L)/(n*n)
