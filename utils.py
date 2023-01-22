@@ -108,18 +108,37 @@ def CSIC(X,Y,k,l):
     L = l(Y,Y)
     n = len(K)
 
-    muk_r = K.sum(axis=1, keepdims=True) / n
-    mul_r = L.sum(axis=1, keepdims=True) / n
-    muk_l = K.sum(axis=0, keepdims=True) / n
-    mul_l = L.sum(axis=0, keepdims=True) / n
+    Kr = K.sum(axis=1, keepdims=True) / n
+    Lr = L.sum(axis=1, keepdims=True) / n
+    Kl = K.sum(axis=0, keepdims=True) / n
+    Ll = L.sum(axis=0, keepdims=True) / n
     
     KK = np.sum(K)/(n*n)
     LL = np.sum(L)/(n*n)
     
-    return np.sum( K*K*L      - 4 * K*muk_r*L     - 2 * K*K*mul_r     + 4 * muk_r*K*mul_r
-               + 2*K*L*KK     + 2 * muk_r*muk_l*L + 4 * K*muk_l*mul_r + K*K*LL
-               - 8*K*mul_r*KK - 4 * K*muk_l*LL    + 4 * KK*KK*LL 
+    return np.sum( K*K*L   - 4*K*Kr*L  - 2*K*K*Lr  + 4*Kr*K*Lr
+               + 2*K*L*KK  + 2*Kr*Kl*L + 4*K*Kl*Lr +   K*K*LL
+               - 8*K*Lr*KK - 4*K*Kl*LL + 4*KK*KK*L 
                  )/(n*n)
+
+def KSE(X, Y, k):
+
+    K3x = CSIC(X,X,k,k)
+    K3y = CSIC(Y,Y,k,k)
+
+
+    K = k(X,Y)
+    n = len(K)
+    Kr = K.sum(axis=1, keepdims=True) / n
+    Kl = K.sum(axis=0, keepdims=True) / n
+    KK = np.sum(K)/(n*n)
+    
+    K3xy = np.sum( K*K*K   + 3*K*K*KK  + 4*K*KK*KK - 3*K*K*Kl 
+               - 3*K*K*Kr  + 6*K*Kl*Kr - 6*K*Kl*KK + 2*K*Kl*Kl
+               - 6*K*Kr*KK + 2*K*Kr*Kr
+                  )/(n*n)
+
+    return K3x + K3y - 2*K3xy
 
 def random_derangement(n):
     while True:
@@ -255,7 +274,7 @@ def getMeanSupOverBandwidths(input):
         res2.append(arr[n,:,amax2,2])
     return np.array(res1), np.array(res2)
    
-def plotRes(dataKME, dataKVE, Nrange, ylabel = 'Test power (%)'):
+def plotRes(dataKME, dataKVE, Nrange, ylabel = 'Test power (%)', maxLines = 110):
     def plotRange(data, lab, col):
         plt.plot(np.arange(1, len(data)+1, 1), 100.0 * data.mean(1), col+'-', alpha = 0.5)
         return plt.boxplot(100.0 * data.transpose(), 
@@ -272,7 +291,7 @@ def plotRes(dataKME, dataKVE, Nrange, ylabel = 'Test power (%)'):
 
     plt.xlabel('N', fontsize=16)
     plt.ylabel(ylabel, fontsize=16)   
-    plt.hlines(list(range(0,110,10)), linestyles='-', xmin=0.0, xmax=15.0, alpha=0.1)
+    plt.hlines(list(range(0,maxLines,10)), linestyles='-', xmin=0.0, xmax=15.0, alpha=0.1)
     return fig
 
 def sampleRangeExperiment(dataGen, 
