@@ -3,3 +3,6 @@ matplotlib == 2.1.2
 scipy      == 1.0.0
 pandas     == 0.22.0
 tqdm       == 4.47.0
+
+SeoulBikeData.csv
+Behavior of the urban traffic of the city of Sao Paulo in Brazil.csv
